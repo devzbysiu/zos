@@ -1,4 +1,5 @@
-const out = @import("putchar.zig");
+const out = @import("common.zig");
+const std = @import("std");
 
 const uint_8 = u8;
 const uint_32 = u32;
@@ -12,16 +13,14 @@ pub export fn _start() callconv(.naked) noreturn {
     const top: usize = @intFromPtr(&__stack_top);
     asm volatile (
         \\ mv sp, %[stack_top]
-        \\ j kernel_main
+        \\ j kernelMain
         :
         : [stack_top] "r" (top),
     );
 }
 
-pub export fn kernel_main() callconv(.c) noreturn {
-    const msg = "\n\nHello World!\n";
-    for (msg) |c| out.putchar(c);
-
+pub export fn kernelMain() callconv(.c) noreturn {
+    out.printf("hello {s}\n{d}\n", .{ "world", 42 });
     while (true) asm volatile ("wfi");
 }
 
