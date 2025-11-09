@@ -1,12 +1,5 @@
 const out = @import("common.zig");
-const std = @import("std");
 
-const uint_8 = u8;
-const uint_32 = u32;
-const size_t = usize;
-
-extern var __bss: u8;
-extern var __bss_end: u8;
 extern var __stack_top: u8;
 
 pub export fn _start() callconv(.naked) noreturn {
