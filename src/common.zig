@@ -24,6 +24,10 @@ pub fn printf(comptime fmt: []const u8, args: anytype) void {
                 printIntArg(args, currArg);
                 currArg += 1;
             },
+            'x' => {
+                printHexArg(args, currArg);
+                currArg += 1;
+            },
             else => {
                 out.putchar('{');
                 out.putchar(c);
@@ -76,6 +80,20 @@ fn printIntArg(args: anytype, comptime idx: usize) void {
                 n /= 10;
             }
             for (buf[j..]) |b| out.putchar(b);
+        }
+    }
+}
+
+fn printHexArg(args: anytype, comptime idx: usize) void {
+    out.putchar('0');
+    out.putchar('x');
+    inline for (args, 0..) |arg, i| {
+        if (comptime i == idx) {
+            inline for (0..8) |k| {
+                const val = 7 - k;
+                const nibble = (arg >> (val * 4)) & 0xf;
+                out.putchar("0123456789abcdef"[nibble]);
+            }
         }
     }
 }
