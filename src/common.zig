@@ -1,7 +1,7 @@
 const out = @import("putchar.zig");
 
 pub fn printf(comptime fmt: []const u8, args: anytype) void {
-    comptime var ai: usize = 0;
+    comptime var currArg: usize = 0;
     comptime var expecting: bool = false;
 
     inline for (fmt) |c| {
@@ -17,12 +17,12 @@ pub fn printf(comptime fmt: []const u8, args: anytype) void {
         switch (c) {
             '{' => out.putchar('{'),
             's' => {
-                printStringArg(args, ai);
-                ai += 1;
+                printStringArg(args, currArg);
+                currArg += 1;
             },
             'd' => {
-                printIntArg(args, ai);
-                ai += 1;
+                printIntArg(args, currArg);
+                currArg += 1;
             },
             else => {
                 out.putchar('{');
