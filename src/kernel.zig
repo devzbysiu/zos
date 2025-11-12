@@ -16,12 +16,3 @@ pub export fn kernelMain() callconv(.c) noreturn {
     out.printf("hello {s}\n{d}\n{x}\n", .{ "world", 42, 0x1234abcd });
     while (true) asm volatile ("wfi");
 }
-
-pub export fn memset(buf: *anyopaque, c: u8, n: usize) *anyopaque {
-    var p: [*]u8 = @ptrCast(buf);
-    var i: usize = 0;
-    while (i < n) : (i += 1) {
-        p[i] = c;
-    }
-    return buf;
-}
