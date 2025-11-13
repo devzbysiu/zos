@@ -99,20 +99,20 @@ fn printHexArg(args: anytype, comptime idx: usize) void {
     }
 }
 
-fn memcpy(dst: *anyopaque, src: *const anyopaque, n: usize) *anyopaque {
+pub fn memcpy(dst: *anyopaque, src: *const anyopaque, n: usize) *anyopaque {
     const d: [*]u8 = @ptrCast(dst);
     const s: [*]const u8 = @ptrCast(src);
     @memcpy(d[0..n], s[0..n]);
     return dst;
 }
 
-fn memset(dst: *anyopaque, c: u8, n: usize) *anyopaque {
+pub fn memset(dst: *anyopaque, c: u8, n: usize) *anyopaque {
     const d: [*]u8 = @ptrCast(dst);
     @memset(d[0..n], c);
     return dst;
 }
 
-fn strcpy(dst: []u8, src: []const u8) []u8 {
+pub fn strcpy(dst: []u8, src: []const u8) []u8 {
     var i: usize = 0;
     for (src) |c| {
         dst[i] = c;
@@ -121,7 +121,7 @@ fn strcpy(dst: []u8, src: []const u8) []u8 {
     return dst;
 }
 
-fn strcmp(str1: []const u8, str2: []const u8) bool {
+pub fn strcmp(str1: []const u8, str2: []const u8) bool {
     for (str1, str2) |s1, s2| {
         if (s1 != s2) return false;
     }
