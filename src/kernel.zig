@@ -14,5 +14,6 @@ pub export fn _start() callconv(.naked) noreturn {
 
 pub export fn kernelMain() callconv(.c) noreturn {
     out.printf("hello {s}\n{d}\n{x}\n", .{ "world", 42, 0x1234abcd });
+    out.panic("testing panic", @src());
     while (true) asm volatile ("wfi");
 }
