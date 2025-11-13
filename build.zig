@@ -15,6 +15,7 @@ pub fn build(b: *std.Build) void {
         .root_module = root_mod,
     });
 
+    exe.addAssemblyFile(b.path("src/trap_vector.S"));
     exe.setLinkerScript(b.path("kernel.ld"));
 
     const install = b.addInstallArtifact(exe, .{

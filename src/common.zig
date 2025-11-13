@@ -1,6 +1,8 @@
 const out = @import("putchar.zig");
 const std = @import("std");
 
+const SourceLocation = std.builtin.SourceLocation;
+
 pub fn printf(comptime fmt: []const u8, args: anytype) void {
     comptime var currArg: usize = 0;
     comptime var expecting: bool = false;
@@ -128,8 +130,8 @@ pub fn strcmp(str1: []const u8, str2: []const u8) bool {
     return true;
 }
 
-pub fn panic(msg: []const u8, src: std.builtin.SourceLocation) void {
-    printf("panic happened: '{s}'\n", .{msg});
+pub fn panic(comptime msg: []const u8, args: anytype, src: SourceLocation) noreturn {
+    printf(msg, args);
     printf("\tin: {s}:{d}\n", .{ src.file, src.line });
     while (true) {}
 }

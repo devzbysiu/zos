@@ -12,4 +12,4 @@ ${QEMU} \
   -serial mon:stdio \
   --no-reboot \
   -kernel zig-out/bin/kernel.elf
-  # -S -s \ # stop and expose debugger
+  # -S -s # stop and expose debugger
