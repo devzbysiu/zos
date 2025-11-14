@@ -42,66 +42,63 @@ pub fn printf(comptime fmt: []const u8, args: anytype) void {
         }
         expecting = false;
     }
-
-    if (comptime fmt.len != 0 and fmt[fmt.len - 1] == '%') out.putchar('%');
 }
 
 fn printStringArg(args: anytype, comptime idx: usize) void {
-    inline for (args, 0..) |arg, i| {
-        if (comptime i == idx) {
-            const s: []const u8 = arg;
-            for (s) |b| out.putchar(b);
-        }
-    }
+    const s: []const u8 = args[idx];
+    for (s) |b| out.putchar(b);
 }
 
 fn printIntArg(args: anytype, comptime idx: usize) void {
-    inline for (args, 0..) |arg, i| {
-        if (comptime i == idx) {
-            const T = @TypeOf(arg);
-            const ti = @typeInfo(T);
-            const is_signed = switch (ti) {
-                .int => |intinfo| intinfo.signedness == .signed,
-                .comptime_int => true,
-                else => @compileError("%d expects an integer"),
-            };
+    const arg = args[idx];
+    const T = @TypeOf(arg);
+    const ti = @typeInfo(T);
+    const is_signed = switch (ti) {
+        .int => |intinfo| intinfo.signedness == .signed,
+        .comptime_int => true,
+        else => @compileError("{d} expects an integer"),
+    };
 
-            if (is_signed and arg < 0) out.putchar('-');
+    var n: u32 = 0;
 
-            // magnitude as u128
-            var n: u128 = if (is_signed)
-                @as(u128, @intCast(if (arg < 0) -arg else arg))
-            else
-                @as(u128, @intCast(arg));
-
-            if (n == 0) {
-                out.putchar('0');
-                return;
-            }
-
-            var buf: [39]u8 = undefined;
-            var j: usize = buf.len;
-            while (n != 0) {
-                j -= 1;
-                buf[j] = '0' + @as(u8, @intCast(n % 10));
-                n /= 10;
-            }
-            for (buf[j..]) |b| out.putchar(b);
+    if (is_signed) {
+        const s = @as(i32, @intCast(arg));
+        if (s < 0) {
+            out.putchar('-');
+            n = @as(u32, @intCast(-s));
+        } else {
+            n = @as(u32, @intCast(s));
         }
+    } else {
+        n = @as(u32, @intCast(arg));
     }
+
+    if (n == 0) {
+        out.putchar('0');
+        return;
+    }
+
+    var buf: [10]u8 = undefined;
+    var j: usize = buf.len;
+    while (n != 0) {
+        j -= 1;
+        buf[j] = '0' + @as(u8, @intCast(n % 10));
+        n /= 10;
+    }
+    for (buf[j..]) |b| out.putchar(b);
 }
 
 fn printHexArg(args: anytype, comptime idx: usize) void {
+    const arg = args[idx];
+
     out.putchar('0');
     out.putchar('x');
-    inline for (args, 0..) |arg, i| {
-        if (comptime i == idx) {
-            inline for (0..8) |k| {
-                const val = 7 - k;
-                const nibble = (arg >> (val * 4)) & 0xf;
-                out.putchar("0123456789abcdef"[nibble]);
-            }
-        }
+
+    // 8 hex digits for 32-bit
+    inline for (0..8) |k| {
+        const shift = (7 - k) * 4;
+        const nibble = (arg >> shift) & 0xf;
+        out.putchar("0123456789abcdef"[nibble]);
     }
 }
 
