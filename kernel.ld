@@ -1,4 +1,4 @@
-ENTRY(_start)
+ENTRY(boot)
 
 SECTIONS {
   . = 0x80200000;

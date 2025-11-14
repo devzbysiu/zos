@@ -13,7 +13,7 @@ pub export fn _start() callconv(.naked) noreturn {
     );
 }
 
-pub export fn kernelMain() callconv(.c) noreturn {
+pub export fn kernelMain() linksection(".text.boot") noreturn {
     out.printf("hello {s}\n{d}\n{x}\n", .{ "world", 42, 0x1234abcd });
     const base: u32 = @intFromPtr(&trap_vector);
     out.printf("base: {x}\n", .{base});
