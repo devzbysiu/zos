@@ -3,6 +3,10 @@ const std = @import("std");
 
 const SourceLocation = std.builtin.SourceLocation;
 
+pub fn log(comptime fmt: []const u8, args: anytype) void {
+    printf("[*] " ++ fmt ++ "\n", args);
+}
+
 pub fn printf(comptime fmt: []const u8, args: anytype) void {
     comptime var currArg: usize = 0;
     comptime var expecting: bool = false;
@@ -131,7 +135,7 @@ pub fn strcmp(str1: []const u8, str2: []const u8) bool {
 }
 
 pub fn panic(comptime msg: []const u8, args: anytype, src: SourceLocation) noreturn {
-    printf(msg, args);
-    printf("\tin: {s}:{d}\n", .{ src.file, src.line });
-    while (true) {}
+    log(msg, args);
+    log("\tin: {s}:{d}", .{ src.file, src.line });
+    while (true) asm volatile ("wfi");
 }

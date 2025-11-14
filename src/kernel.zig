@@ -14,14 +14,14 @@ pub export fn _start() callconv(.naked) noreturn {
 }
 
 pub export fn kernelMain() linksection(".text.boot") noreturn {
-    out.printf("starting kernel...", .{});
+    out.log("starting kernel...", .{});
 
     const trap_vector_addr: u32 = @intFromPtr(&trap_vector);
-    out.printf("trap vector address: {x}\n", .{trap_vector_addr});
+    out.log("trap vector address: {x}", .{trap_vector_addr});
     writeCsr("stvec", trap_vector_addr);
     asm volatile ("unimp");
 
-    out.printf("continuing execution...", .{});
+    out.log("continuing execution...", .{});
     while (true) asm volatile ("wfi");
 }
 
@@ -109,7 +109,7 @@ pub export fn handleTrap(_: *TrapFrame) callconv(.c) noreturn {
     const scause: u32 = readCsr("scause");
     const stval: u32 = readCsr("stval");
     const user_pc: u32 = readCsr("sepc");
-    out.panic("unexpected trap scause={x}, stval={x}, sepc={x}\n", .{
+    out.panic("unexpected trap scause={x}, stval={x}, sepc={x}", .{
         scause,
         stval,
         user_pc,
