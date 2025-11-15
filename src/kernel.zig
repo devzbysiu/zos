@@ -3,7 +3,7 @@ const std = @import("std");
 
 extern var __stack_top: u8;
 
-pub export fn _start() callconv(.naked) noreturn {
+pub export fn _start() linksection(".text.boot") callconv(.naked) noreturn {
     const top: usize = @intFromPtr(&__stack_top);
     asm volatile (
         \\ mv sp, %[stack_top]
@@ -13,7 +13,7 @@ pub export fn _start() callconv(.naked) noreturn {
     );
 }
 
-pub export fn kernelMain() linksection(".text.boot") noreturn {
+pub export fn kernelMain() noreturn {
     out.log("starting kernel...", .{});
 
     const trap_vector_addr: u32 = @intFromPtr(&trap_vector);
@@ -109,11 +109,7 @@ pub export fn handleTrap(_: *TrapFrame) callconv(.c) noreturn {
     const scause: u32 = readCsr("scause");
     const stval: u32 = readCsr("stval");
     const user_pc: u32 = readCsr("sepc");
-    out.panic("unexpected trap scause={x}, stval={x}, sepc={x}", .{
-        scause,
-        stval,
-        user_pc,
-    }, @src());
+    out.panic("trap scause={x}, stval={x}, sepc={x}", .{ scause, stval, user_pc }, @src());
 }
 
 const TrapFrame = packed struct {
