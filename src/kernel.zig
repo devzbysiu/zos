@@ -2,11 +2,21 @@ const std = @import("std");
 
 const out = @import("common.zig");
 const panic = out.panic;
+const memset = out.memset;
 const log = out.log;
 
 extern var __stack_top: u8;
+extern var __free_ram: u8;
+extern var __free_ram_end: u8;
+
+pub export var next_addr: u32 = undefined;
+const page_size: u32 = 4096;
 
 pub export fn _start() linksection(".text.boot") callconv(.naked) noreturn {
+    // initialize next free allocator address;
+    next_addr = @intFromPtr(&__free_ram);
+
+    // setup stack and hand over execution to `kernelMain`
     const top: usize = @intFromPtr(&__stack_top);
     asm volatile (
         \\ mv sp, %[stack_top]
@@ -19,10 +29,17 @@ pub export fn _start() linksection(".text.boot") callconv(.naked) noreturn {
 pub export fn kernelMain() noreturn {
     log("starting kernel...", .{});
 
+    // set trap exception handler
     const trap_vector_addr: u32 = @intFromPtr(&trap_vector);
     log("trap vector address: {x}", .{trap_vector_addr});
     writeCsr("stvec", trap_vector_addr);
-    asm volatile ("unimp");
+    // asm volatile ("unimp"); // trigger trap for testing
+
+    // test allocator
+    const paddr0 = allocPages(2);
+    const paddr1 = allocPages(1);
+    log("allocPages test: paddr0={x}", .{paddr0});
+    log("allocPages test: paddr1={x}", .{paddr1});
 
     log("continuing execution...", .{});
     while (true) asm volatile ("wfi");
@@ -163,4 +180,21 @@ fn writeCsr(comptime csr_name: []const u8, value: u32) void {
         : [in] "r" (value),
         : .{} // no clobbers
     );
+}
+
+fn allocPages(n: usize) u32 {
+    const bytes = n * page_size;
+    const page_addr = next_addr;
+    const limit = @intFromPtr(&__free_ram_end);
+
+    if (next_addr + bytes > limit) {
+        panic("can't allocate {d} pages, not enough RAM", .{n}, @src());
+    }
+
+    next_addr += bytes;
+
+    const addr: *anyopaque = @ptrFromInt(page_addr);
+    _ = memset(addr, 0, n * page_size);
+
+    return page_addr;
 }
