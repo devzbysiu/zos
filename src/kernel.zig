@@ -1,5 +1,8 @@
-const out = @import("common.zig");
 const std = @import("std");
+
+const out = @import("common.zig");
+const panic = out.panic;
+const log = out.log;
 
 extern var __stack_top: u8;
 
@@ -14,14 +17,14 @@ pub export fn _start() linksection(".text.boot") callconv(.naked) noreturn {
 }
 
 pub export fn kernelMain() noreturn {
-    out.log("starting kernel...", .{});
+    log("starting kernel...", .{});
 
     const trap_vector_addr: u32 = @intFromPtr(&trap_vector);
-    out.log("trap vector address: {x}", .{trap_vector_addr});
+    log("trap vector address: {x}", .{trap_vector_addr});
     writeCsr("stvec", trap_vector_addr);
     asm volatile ("unimp");
 
-    out.log("continuing execution...", .{});
+    log("continuing execution...", .{});
     while (true) asm volatile ("wfi");
 }
 
@@ -109,7 +112,7 @@ pub export fn handleTrap(_: *TrapFrame) callconv(.c) noreturn {
     const scause: u32 = readCsr("scause");
     const stval: u32 = readCsr("stval");
     const user_pc: u32 = readCsr("sepc");
-    out.panic("trap scause={x}, stval={x}, sepc={x}", .{ scause, stval, user_pc }, @src());
+    panic("trap scause={x}, stval={x}, sepc={x}", .{ scause, stval, user_pc }, @src());
 }
 
 const TrapFrame = packed struct {
